@@ -2,6 +2,10 @@
 
 A self-hosted application gateway for managing and accessing your web services. Features multi-method authentication, group-based access control, automatic app discovery from Docker/Traefik/Nginx/NPM/Caddy, and real-time health monitoring.
 
+![DashGate Dashboard](docs/screenshots/dashboard.png)
+
+![DashGate Login](docs/screenshots/login.png)
+
 ## Features
 
 - **Multi-method authentication** - Local accounts, LDAP, OIDC/OAuth2, and reverse proxy (Authelia/Authentik) support
@@ -80,9 +84,16 @@ CONFIG_PATH=./config.yaml DB_PATH=./dashgate.db ICONS_PATH=./static/icons ./dash
 
 Requires MSYS2 with MinGW-w64 GCC at `C:\msys64\mingw64\bin\gcc.exe`.
 
-```batch
-build.bat
-run.bat
+```powershell
+$env:PATH = "C:\msys64\mingw64\bin;" + $env:PATH
+$env:CGO_ENABLED = "1"
+go build -o dashgate.exe .
+
+$env:CONFIG_PATH = ".\config.yaml"
+$env:DB_PATH = ".\dashgate.db"
+$env:TEMPLATES_PATH = ".\templates"
+$env:STATIC_PATH = ".\static"
+.\dashgate.exe
 ```
 
 ## Configuration
