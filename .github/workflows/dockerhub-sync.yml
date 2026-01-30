@@ -1,0 +1,24 @@
+name: Sync Docker Hub Description
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - README.md
+
+jobs:
+  update:
+    name: Update Docker Hub
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update Docker Hub description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: khak1s/dashgate
+          short-description: "Self-hosted application gateway with multi-method auth and auto-discovery"
+          readme-filepath: ./README.md
