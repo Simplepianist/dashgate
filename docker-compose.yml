@@ -1,0 +1,53 @@
+services:
+  dashgate:
+    build: .
+    # image: khak1s/dashgate:latest           # Docker Hub — use after first release
+    # image: ghcr.io/OWNER/dashgate:latest    # GHCR — use after first release
+    container_name: dashgate
+    restart: unless-stopped
+    ports:
+      - "1738:1738"
+    volumes:
+      - dashgate-data:/config
+      # Uncomment to enable Docker auto-discovery
+      # - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - PORT=1738
+      # - ENCRYPTION_KEY=              # 64-char hex, auto-generated if omitted
+      #
+      # --- Authentication ---
+      # - AUTH_MODE=local              # local | hybrid | authelia
+      # - SESSION_DURATION_DAYS=7
+      #
+      # --- LLDAP user directory (optional) ---
+      # - LLDAP_URL=http://lldap:17170
+      # - LLDAP_ADMIN_USERNAME=admin
+      # - LLDAP_ADMIN_PASSWORD=changeme
+      #
+      # --- Docker discovery ---
+      # - DOCKER_DISCOVERY=true
+      #
+      # --- Traefik discovery ---
+      # - TRAEFIK_DISCOVERY=true
+      # - TRAEFIK_URL=http://traefik:8080
+      # - TRAEFIK_USERNAME=
+      # - TRAEFIK_PASSWORD=
+      #
+      # --- Nginx Proxy Manager discovery ---
+      # - NPM_DISCOVERY=true
+      # - NPM_URL=http://npm:81
+      # - NPM_EMAIL=admin@example.com
+      # - NPM_PASSWORD=changeme
+      #
+      # --- Nginx config discovery ---
+      # - NGINX_DISCOVERY=true
+      # - NGINX_CONFIG_PATH=/etc/nginx/conf.d
+      #
+      # --- Caddy discovery ---
+      # - CADDY_DISCOVERY=true
+      # - CADDY_ADMIN_URL=http://caddy:2019
+      # - CADDY_USERNAME=
+      # - CADDY_PASSWORD=
+
+volumes:
+  dashgate-data:

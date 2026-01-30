@@ -1,0 +1,44 @@
+# Binaries
+dashgate
+dashgate.exe
+*.exe
+*.debug
+
+# Database
+*.db
+*.db-wal
+*.db-shm
+
+# Environment and credentials
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git & GitHub
+.git/
+.gitignore
+.github/
+
+# Documentation
+*.md
+LICENSE
+
+# Development
+test-discovery/
+cookies.txt
+*.ps1
+build.bat
+run.bat
+
+# Testing
+e2e/

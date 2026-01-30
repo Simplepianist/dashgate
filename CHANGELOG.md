@@ -1,0 +1,83 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.0] - 2025-01-30
+
+Initial public release.
+
+### Authentication
+
+- Multi-method authentication with simultaneous provider support
+- Local user accounts with bcrypt password hashing (SHA-256 pre-hash for >72 byte passwords)
+- LDAP/Active Directory authentication with configurable filters, attribute mappings, and StartTLS
+- OIDC/OAuth2 flow with configurable scopes, groups claim, and automatic user provisioning
+- Proxy header authentication (Authelia/Authentik) with trusted proxy IP validation
+- API key authentication with bcrypt-hashed keys, prefix lookup, expiration, and usage tracking
+- Configurable session duration with HttpOnly/Secure/SameSite cookies
+- Session fixation prevention — existing sessions invalidated on new login
+- First-time setup wizard for guided auth provider configuration
+
+### DashGate
+
+- Category-based app organization with YAML or UI-based configuration
+- Group-based access control — users only see apps their groups permit
+- Real-time health status indicators (online/offline/unknown) via background checks
+- Service dependency graph with forward and reverse dependency tracking
+- Per-user theme preferences (light/dark mode, accent colors)
+- Progressive Web App with service worker, offline page, and install support
+- Self-hosted Inter font family (no external CDN)
+
+### Admin Panel
+
+- App catalog CRUD — add, edit, delete apps and categories from the UI
+- Custom icon upload with file type validation and SVG XSS scanning
+- Local user management — create, update, delete users and reset passwords
+- API key management with scoped permissions and optional expiration
+- System configuration editor for auth, session, and proxy settings
+- LLDAP directory browsing (read-only users and groups)
+- Audit logging for all admin actions with IP tracking
+- Backup and restore of system configuration and user data
+- Discovered app override management (rename, re-icon, re-categorize, hide/show)
+
+### App Discovery
+
+- Docker container discovery via socket API with label-based metadata
+- Traefik router discovery via API with basic auth support
+- Nginx configuration file parsing for server blocks
+- Nginx Proxy Manager proxy host discovery via API
+- Caddy reverse proxy route discovery via admin API
+- Per-source enable/disable, manual refresh, and connection testing
+- Override system for customizing discovered app display and access
+
+### Security
+
+- Content Security Policy with per-request nonces for inline scripts
+- CSRF protection via double-submit cookie with constant-time comparison
+- Per-IP rate limiting on login endpoints (configurable limit and window)
+- Security headers: HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy
+- AES-256-GCM encryption at rest for sensitive config values (passwords, secrets)
+- Encryption key management via environment variable or auto-generation
+- Request body size limiting (1 MB) to prevent DoS
+- URL scheme validation to block javascript: XSS in app URLs
+- Directory listing disabled on static file server
+- Open redirect prevention on login/OIDC callbacks
+- Non-root Docker container (uid 1000)
+
+### Infrastructure
+
+- Embedded SQLite database with WAL mode, automatic schema creation, and migrations
+- Graceful shutdown — all background goroutines (health checker, session cleanup, rate limiter) stop cleanly via context cancellation
+- Panic recovery in all background goroutines
+- Multi-stage Docker build with Alpine runtime (~9.5 MB image)
+- Docker Compose configuration with volume mounts
+- Background health checker with concurrent checks (semaphore-limited to 20)
+- Periodic session cleanup (hourly)
+- Configuration hierarchy: environment variables > database > YAML > defaults
+- Version tracking via build-time ldflags injection
+- End-to-end test suite (Playwright) covering auth, DashGate dashboard, admin, setup, and settings
+- Encryption unit tests
+- Windows build scripts (batch and PowerShell) with MSYS2/MinGW CGO support

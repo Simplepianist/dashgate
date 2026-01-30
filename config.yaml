@@ -1,0 +1,16 @@
+# DashGate Configuration
+# Add your applications organized by category.
+# Apps can also be added through the admin UI after setup.
+#
+# Example:
+#   categories:
+#     - name: Services
+#       apps:
+#         - name: My App
+#           url: https://app.example.com
+#           icon: mdi:web
+#           description: An example application
+#           groups:
+#             - admins
+#
+categories: []

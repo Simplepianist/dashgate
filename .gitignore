@@ -1,0 +1,42 @@
+# Binary
+dashgate
+dashgate.exe
+*.exe~
+
+# Database
+*.db
+*.db-wal
+*.db-shm
+
+# Environment
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+nul
+
+# Debug
+*.debug
+main.go.debug
+
+# AI assistant
+CLAUDE.md
+
+# Cookies
+cookies.txt
+
+# Temp
+test-discovery/
+test-auth/
+
+# E2E tests
+e2e/node_modules/
+e2e/test-results/
+e2e/playwright-report/

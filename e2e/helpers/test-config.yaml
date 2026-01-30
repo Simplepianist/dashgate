@@ -1,0 +1,26 @@
+title: E2E Test DashGate
+categories:
+    - name: Monitoring
+      apps:
+        - name: Grafana
+          url: http://localhost:3000
+          icon: grafana.svg
+          groups:
+            - admins
+            - users
+          description: "Metrics monitoring"
+        - name: Prometheus
+          url: http://localhost:9090
+          icon: prometheus.svg
+          groups:
+            - admins
+          description: "Metrics collection"
+    - name: Development
+      apps:
+        - name: Gitea
+          url: http://localhost:3001
+          icon: gitea.svg
+          groups:
+            - admins
+            - users
+          description: "Git hosting"
