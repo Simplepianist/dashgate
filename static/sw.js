@@ -1,5 +1,5 @@
 // Service Worker for DashGate PWA
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v6';
 const STATIC_CACHE = `dashgate-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `dashgate-dynamic-${CACHE_VERSION}`;
 const OFFLINE_URL = '/offline.html';
@@ -64,6 +64,12 @@ self.addEventListener('fetch', (event) => {
       return;
     }
     event.respondWith(networkFirst(request));
+    return;
+  }
+
+  // Icons - stale while revalidate (user-customizable, may change at same URL)
+  if (url.pathname.startsWith('/static/icons/')) {
+    event.respondWith(staleWhileRevalidate(request));
     return;
   }
 
