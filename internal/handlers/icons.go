@@ -29,29 +29,6 @@ var (
 	iconCacheTTL  = 24 * time.Hour
 )
 
-// validateSVGContent checks SVG content for dangerous XSS patterns.
-func validateSVGContent(content []byte) error {
-	contentStr := strings.ToLower(string(content))
-	dangerousPatterns := []string{
-		"<script", "javascript:", "vbscript:", "data:text/html", "data:image/svg+xml",
-		"onerror", "onload", "onclick", "onmouseover", "onmouseout",
-		"onfocus", "onblur", "oninput", "onchange", "onsubmit",
-		"onkeydown", "onkeyup", "onkeypress", "onmousedown", "onmouseup",
-		"ondblclick", "oncontextmenu", "ondrag", "ondragend", "ondragenter",
-		"ondragleave", "ondragover", "ondragstart", "ondrop", "onscroll",
-		"onwheel", "oncopy", "oncut", "onpaste", "onanimationend",
-		"onanimationstart", "ontransitionend", "onresize", "ontoggle",
-		"onbegin", "onend", "onrepeat",
-		"<foreignobject", "<iframe", "<embed", "<object", "<handler",
-		"expression(",
-	}
-	for _, pattern := range dangerousPatterns {
-		if strings.Contains(contentStr, pattern) {
-			return fmt.Errorf("SVG contains potentially unsafe content: %s", pattern)
-		}
-	}
-	return nil
-}
 
 // SelfhstIconHandler sucht und lädt Icons von selfh.st automatisch
 func SelfhstIconHandler(app *server.App) http.HandlerFunc {
