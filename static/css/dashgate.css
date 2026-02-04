@@ -2236,6 +2236,15 @@
             display: flex;
         }
 
+        /* Icon Selector Modal always on top */
+        #iconSelectorModal {
+            z-index: 3000;
+        }
+
+        #iconSelectorModal.open {
+            z-index: 4000;
+        }
+
         .admin-modal-backdrop {
             position: absolute;
             inset: 0;
