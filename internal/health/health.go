@@ -103,12 +103,42 @@ func RunHealthChecks(app *server.App) {
 
 	app.ConfigMu.RLock()
 	urls := make(map[string]bool)
+	// Add config apps
 	for _, cat := range app.Config.Categories {
 		for _, a := range cat.Apps {
 			urls[a.URL] = true
 		}
 	}
 	app.ConfigMu.RUnlock()
+
+	// Add discovered apps
+	app.DiscoveryMu.Lock()
+	if app.DockerDiscovery != nil {
+		for _, dApp := range app.DockerDiscovery.GetApps() {
+			urls[dApp.URL] = true
+		}
+	}
+	if app.TraefikDiscovery != nil {
+		for _, dApp := range app.TraefikDiscovery.GetApps() {
+			urls[dApp.URL] = true
+		}
+	}
+	if app.NginxDiscovery != nil {
+		for _, dApp := range app.NginxDiscovery.GetApps() {
+			urls[dApp.URL] = true
+		}
+	}
+	if app.CaddyDiscovery != nil {
+		for _, dApp := range app.CaddyDiscovery.GetApps() {
+			urls[dApp.URL] = true
+		}
+	}
+	if app.NPMDiscovery != nil {
+		for _, dApp := range app.NPMDiscovery.GetApps() {
+			urls[dApp.URL] = true
+		}
+	}
+	app.DiscoveryMu.Unlock()
 
 	sem := make(chan struct{}, 20)
 
