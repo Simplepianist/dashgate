@@ -65,17 +65,18 @@ func AutoLoginRedirect(app *server.App) func(http.Handler) http.Handler {
 	}
 }
 
-// GetAuthRedirectURL bestimmt den richtigen Redirect URL basierend auf AuthMode
+// GetAuthRedirectURL bestimmt den richtigen Redirect URL basierend auf AuthMode und SystemConfig
 func GetAuthRedirectURL(app *server.App) string {
+	// Authelia ist der OIDC Mode
 	switch app.AuthConfig.Mode {
-	case models.AuthModeOIDC:
-		// Bei OIDC-Only: Direkter OIDC Login (wird zum Redirect Handler geleitet)
+	case models.AuthModeAuthelia:
+		// Authelia/OIDC: Direkter OIDC Redirect
 		return "/auth/oidc"
-	case models.AuthModeNone:
-		// Kein Auth konfiguriert - sollte nicht vorkommen aber Fallback
+	case models.AuthModeLocal, models.AuthModeHybrid:
+		// Local oder Hybrid: Login Page
 		return "/login"
 	default:
-		// Local, Hybrid, Proxy, LDAP: Gehe zu /login
+		// Fallback
 		return "/login"
 	}
 }
