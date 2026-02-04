@@ -251,6 +251,10 @@ func main() {
 	mux.HandleFunc("/api/admin/config/icons/dashboard-icons", auth.RequireAdmin(app, handlers.AdminDashboardIconsHandler(app)))
 	mux.HandleFunc("/api/admin/config/icons/download", auth.RequireAdmin(app, handlers.AdminIconDownloadHandler(app)))
 
+	// Icon Management - Auto-download from selfh.st
+	mux.HandleFunc("/api/admin/icons/selfhst/search", auth.RequireAdmin(app, handlers.SelfhstIconHandler(app)))
+	mux.HandleFunc("/api/admin/icons/selfhst/auto-update", auth.RequireAdmin(app, handlers.AutoIconUpdateHandler(app)))
+
 	// Dependencies API
 	mux.HandleFunc("/api/dependencies", handlers.DependenciesHandler(app))
 
@@ -274,11 +278,12 @@ func main() {
 	mux.HandleFunc("/api/admin/backup", auth.RequireAdmin(app, handlers.BackupHandler(app)))
 	mux.HandleFunc("/api/admin/restore", auth.RequireAdmin(app, handlers.RestoreHandler(app)))
 
-	// Apply middleware chain: body size limit → rate limiting → CSRF → security headers
+	// Apply middleware chain: body size limit → rate limiting → CSRF → security headers → auto login redirect
 	bodySizeLimited := middleware.MaxBodySize(1<<20, mux) // 1 MB max request body
 	rateLimited := loginLimiter.LimitPath([]string{"/api/auth/login", "/login"}, bodySizeLimited)
 	csrfProtected := middleware.CSRFProtection(rateLimited)
-	handler := middleware.SecurityHeaders(csrfProtected)
+	authRedirect := middleware.AutoLoginRedirect(app)
+	handler := middleware.SecurityHeaders(authRedirect(csrfProtected))
 
 	port := os.Getenv("PORT")
 	if port == "" {

@@ -98,7 +98,7 @@ func DashboardHandler(app *server.App) http.HandlerFunc {
 			}
 		}
 
-		// Add discovered apps that have overrides (opt-in model)
+		// Add discovered apps (opt-out model: shown by default unless explicitly hidden)
 		userGroupSet := make(map[string]bool)
 		for _, g := range user.Groups {
 			userGroupSet[strings.TrimSpace(g)] = true
@@ -112,18 +112,22 @@ func DashboardHandler(app *server.App) http.HandlerFunc {
 			if configURLs[dApp.URL] {
 				continue
 			}
-			// Skip if no override (not configured = not shown)
-			if dApp.Override == nil {
+
+			// Skip if explicitly hidden via override
+			if dApp.Override != nil && dApp.Override.Hidden {
 				continue
 			}
-			// Skip if hidden
-			if dApp.Override.Hidden {
-				continue
+
+			// Determine groups: use override groups if set, otherwise empty (visible to all)
+			groups := []string{}
+			if dApp.Override != nil && len(dApp.Override.Groups) > 0 {
+				groups = dApp.Override.Groups
 			}
+
 			// Check group access (admins see all; no groups = visible to all)
-			if !user.IsAdmin && len(dApp.Override.Groups) > 0 {
+			if !user.IsAdmin && len(groups) > 0 {
 				hasAccess := false
-				for _, g := range dApp.Override.Groups {
+				for _, g := range groups {
 					if userGroupSet[g] {
 						hasAccess = true
 						break
@@ -134,27 +138,29 @@ func DashboardHandler(app *server.App) http.HandlerFunc {
 				}
 			}
 
-			// Apply overrides
+			// Apply overrides if they exist
 			name := dApp.Name
-			if dApp.Override.NameOverride != "" {
-				name = dApp.Override.NameOverride
-			}
 			appURL := dApp.URL
-			if dApp.Override.URLOverride != "" {
-				appURL = dApp.Override.URLOverride
-			}
 			icon := dApp.Icon
-			if dApp.Override.IconOverride != "" {
-				icon = dApp.Override.IconOverride
-			}
 			desc := dApp.Description
-			if dApp.Override.DescriptionOverride != "" {
-				desc = dApp.Override.DescriptionOverride
-			}
+			category := "Discovered"
 
-			category := dApp.Override.Category
-			if category == "" {
-				category = "Discovered"
+			if dApp.Override != nil {
+				if dApp.Override.NameOverride != "" {
+					name = dApp.Override.NameOverride
+				}
+				if dApp.Override.URLOverride != "" {
+					appURL = dApp.Override.URLOverride
+				}
+				if dApp.Override.IconOverride != "" {
+					icon = dApp.Override.IconOverride
+				}
+				if dApp.Override.DescriptionOverride != "" {
+					desc = dApp.Override.DescriptionOverride
+				}
+				if dApp.Override.Category != "" {
+					category = dApp.Override.Category
+				}
 			}
 
 			a := models.App{
@@ -162,7 +168,7 @@ func DashboardHandler(app *server.App) http.HandlerFunc {
 				URL:         appURL,
 				Icon:        icon,
 				Description: desc,
-				Groups:      dApp.Override.Groups,
+				Groups:      groups,
 				Status:      health.GetHealthStatus(app, appURL),
 			}
 			discoveredByCategory[category] = append(discoveredByCategory[category], a)

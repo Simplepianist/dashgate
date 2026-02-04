@@ -1,0 +1,240 @@
+<!--
+Auto-Icon Management UI - Füge diese Elemente ins Admin-Panel Template ein
+Location: Irgendwo in der Icons-Management-Sektion des Admin-Panels
+-->
+
+<div class="icon-auto-update-section" style="margin-top: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
+    <h3>🔄 Auto-Icon Management (selfh.st)</h3>
+
+    <p style="color: #666; margin-bottom: 1rem;">
+        Lade Icons automatisch von <strong>selfh.st</strong> für Apps ohne Icons herunter.
+        Die Funktion sucht passende Icons basierend auf App-Name und Domain.
+    </p>
+
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <button
+            id="auto-update-icons-btn"
+            onclick="autoUpdateIcons()"
+            class="btn btn-primary"
+            style="padding: 0.75rem 1.5rem; cursor: pointer; background-color: #0066cc; color: white; border: none; border-radius: 4px; font-weight: 500; transition: background-color 0.2s;"
+            onmouseover="this.style.backgroundColor='#0052a3'"
+            onmouseout="this.style.backgroundColor='#0066cc'"
+        >
+            🔄 Auto-Update Icons from selfh.st
+        </button>
+
+        <button
+            id="search-icon-btn"
+            onclick="showIconSearchModal()"
+            class="btn btn-secondary"
+            style="padding: 0.75rem 1.5rem; cursor: pointer; background-color: #666; color: white; border: none; border-radius: 4px; font-weight: 500; transition: background-color 0.2s;"
+            onmouseover="this.style.backgroundColor='#444'"
+            onmouseout="this.style.backgroundColor='#666'"
+        >
+            🔍 Search Single Icon
+        </button>
+    </div>
+
+    <div id="auto-update-progress" style="display: none; margin-top: 1rem;">
+        <div style="background-color: white; padding: 1rem; border-radius: 4px;">
+            <p><strong>Status:</strong> <span id="progress-status">Initializing...</span></p>
+            <div style="margin-top: 0.5rem; height: 20px; background-color: #eee; border-radius: 4px; overflow: hidden;">
+                <div
+                    id="progress-bar"
+                    style="height: 100%; background-color: #0066cc; width: 0%; transition: width 0.3s;"
+                ></div>
+            </div>
+            <p id="progress-details" style="margin-top: 0.5rem; color: #666; font-size: 0.9rem;"></p>
+        </div>
+    </div>
+
+    <div id="auto-update-results" style="display: none; margin-top: 1rem; background-color: white; padding: 1rem; border-radius: 4px;">
+        <h4>📊 Update Results</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+            <div style="text-align: center; padding: 1rem; background-color: #f0f8ff; border-radius: 4px;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #00aa00;" id="result-updated">0</div>
+                <div style="color: #666; font-size: 0.9rem;">Icons Updated</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background-color: #fff5f0; border-radius: 4px;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #aa0000;" id="result-failed">0</div>
+                <div style="color: #666; font-size: 0.9rem;">Failed</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background-color: #f5f5f5; border-radius: 4px;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #aa6600;" id="result-skipped">0</div>
+                <div style="color: #666; font-size: 0.9rem;">Skipped</div>
+            </div>
+        </div>
+
+        <details style="margin-top: 1rem;">
+            <summary style="cursor: pointer; font-weight: 500; color: #0066cc;">📝 Details</summary>
+            <div id="result-details" style="margin-top: 0.5rem; padding: 1rem; background-color: #f9f9f9; border-radius: 4px; font-size: 0.9rem; max-height: 300px; overflow-y: auto;"></div>
+        </details>
+    </div>
+</div>
+
+<!-- Search Modal -->
+<div id="icon-search-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+    <div style="background-color: white; padding: 2rem; border-radius: 8px; max-width: 500px; width: 90%;">
+        <h3>Search Icon</h3>
+        <input
+            type="text"
+            id="search-app-name"
+            placeholder="App Name"
+            style="width: 100%; padding: 0.5rem; margin: 0.5rem 0; border: 1px solid #ddd; border-radius: 4px;"
+        />
+        <input
+            type="url"
+            id="search-app-url"
+            placeholder="App URL (e.g., https://example.com)"
+            style="width: 100%; padding: 0.5rem; margin: 0.5rem 0; border: 1px solid #ddd; border-radius: 4px;"
+        />
+        <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+            <button
+                onclick="performIconSearch()"
+                class="btn btn-primary"
+                style="flex: 1; padding: 0.75rem; background-color: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer;"
+            >
+                Search
+            </button>
+            <button
+                onclick="closeIconSearchModal()"
+                class="btn btn-secondary"
+                style="flex: 1; padding: 0.75rem; background-color: #666; color: white; border: none; border-radius: 4px; cursor: pointer;"
+            >
+                Close
+            </button>
+        </div>
+        <div id="search-result" style="margin-top: 1rem; padding: 1rem; background-color: #f9f9f9; border-radius: 4px; display: none;"></div>
+    </div>
+</div>
+
+<script>
+// Stelle sicher, dass auto-icons.js geladen ist
+if (!window.autoIconManager) {
+    console.error('auto-icons.js not loaded. Bitte static/js/auto-icons.js included in your HTML.');
+}
+
+async function autoUpdateIcons() {
+    if (!confirm('Dies wird versuchen, Icons für alle Apps ohne Icons von selfh.st zu laden. Fortfahren?')) {
+        return;
+    }
+
+    const btn = document.getElementById('auto-update-icons-btn');
+    const progressDiv = document.getElementById('auto-update-progress');
+    const resultsDiv = document.getElementById('auto-update-results');
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Updating...';
+    progressDiv.style.display = 'block';
+    resultsDiv.style.display = 'none';
+
+    try {
+        document.getElementById('progress-status').textContent = 'Fetching icon list from selfh.st...';
+
+        const result = await window.autoIconManager.autoUpdateAllIcons();
+
+        // Show results
+        document.getElementById('result-updated').textContent = result.updated;
+        document.getElementById('result-failed').textContent = result.failed;
+        document.getElementById('result-skipped').textContent = result.skipped;
+
+        // Show details
+        if (result.details && result.details.length > 0) {
+            let detailsHTML = '<ul style="margin: 0; padding-left: 1.5rem;">';
+            for (const detail of result.details) {
+                const status = detail.error ? '❌' : '✅';
+                const message = detail.error || `Loaded: ${detail.icon}`;
+                detailsHTML += `<li style="margin: 0.25rem 0;"><strong>${detail.app}</strong>: ${status} ${message}</li>`;
+            }
+            detailsHTML += '</ul>';
+            document.getElementById('result-details').innerHTML = detailsHTML;
+        }
+
+        progressDiv.style.display = 'none';
+        resultsDiv.style.display = 'block';
+
+        alert(`✅ Icons updated!\n\nUpdated: ${result.updated}\nFailed: ${result.failed}\nSkipped: ${result.skipped}`);
+
+        // Optionally reload page to show new icons
+        setTimeout(() => {
+            if (result.updated > 0) {
+                window.location.reload();
+            }
+        }, 2000);
+
+    } catch (error) {
+        alert(`❌ Failed to update icons: ${error.message}`);
+        progressDiv.style.display = 'none';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '🔄 Auto-Update Icons from selfh.st';
+    }
+}
+
+function showIconSearchModal() {
+    document.getElementById('icon-search-modal').style.display = 'flex';
+}
+
+function closeIconSearchModal() {
+    document.getElementById('icon-search-modal').style.display = 'none';
+    document.getElementById('search-result').style.display = 'none';
+}
+
+async function performIconSearch() {
+    const name = document.getElementById('search-app-name').value;
+    const url = document.getElementById('search-app-url').value;
+    const resultDiv = document.getElementById('search-result');
+
+    if (!name || !url) {
+        alert('Bitte App Name und URL eingeben');
+        return;
+    }
+
+    try {
+        resultDiv.innerHTML = '<p>🔍 Searching...</p>';
+        resultDiv.style.display = 'block';
+
+        const result = await window.autoIconManager.searchIcon(url, name);
+
+        resultDiv.innerHTML = `
+            <div style="text-align: center;">
+                <div style="color: #00aa00; font-size: 2rem; margin-bottom: 0.5rem;">✅</div>
+                <p><strong>Icon gefunden und heruntergeladen!</strong></p>
+                <p style="color: #666; font-size: 0.9rem;">Datei: <code>${result.filename}</code></p>
+            </div>
+        `;
+
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
+
+    } catch (error) {
+        resultDiv.innerHTML = `
+            <div style="color: #aa0000;">
+                <p><strong>❌ Icon nicht gefunden</strong></p>
+                <p style="font-size: 0.9rem; color: #666;">${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('icon-search-modal');
+    if (event.target === modal) {
+        closeIconSearchModal();
+    }
+});
+</script>
+
+<style>
+/* Ensure modal is centered */
+#icon-search-modal {
+    display: none !important;
+}
+
+#icon-search-modal[style*="display: flex"] {
+    display: flex !important;
+}
+</style>
+
