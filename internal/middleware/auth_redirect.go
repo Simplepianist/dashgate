@@ -6,10 +6,12 @@ import (
 	"strings"
 
 	"dashgate/internal/auth"
+	"dashgate/internal/models"
 	"dashgate/internal/server"
 )
 
 // AutoLoginRedirect ist eine Middleware die bei fehlender Auth automatisch zum Login redirected
+// oder bei OIDC-Only zum OIDC Endpoint
 func AutoLoginRedirect(app *server.App) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -47,18 +49,34 @@ func AutoLoginRedirect(app *server.App) func(http.Handler) http.Handler {
 					w.WriteHeader(http.StatusUnauthorized)
 					json.NewEncoder(w).Encode(map[string]string{
 						"error":    "unauthorized",
-						"redirect": "/login",
+						"redirect": GetAuthRedirectURL(app),
 					})
 					return
 				}
 
-				// Browser Requests werden zum Login redirected
-				http.Redirect(w, r, "/login?redirect="+r.URL.Path, http.StatusFound)
+				// Browser Requests werden zum Login oder OIDC redirected
+				redirectURL := GetAuthRedirectURL(app)
+				http.Redirect(w, r, redirectURL, http.StatusFound)
 				return
 			}
 
 			next.ServeHTTP(w, r)
 		})
+	}
+}
+
+// GetAuthRedirectURL bestimmt den richtigen Redirect URL basierend auf AuthMode
+func GetAuthRedirectURL(app *server.App) string {
+	switch app.AuthConfig.Mode {
+	case models.AuthModeOIDC:
+		// Bei OIDC-Only: Direkter OIDC Login (wird zum Redirect Handler geleitet)
+		return "/auth/oidc"
+	case models.AuthModeNone:
+		// Kein Auth konfiguriert - sollte nicht vorkommen aber Fallback
+		return "/login"
+	default:
+		// Local, Hybrid, Proxy, LDAP: Gehe zu /login
+		return "/login"
 	}
 }
 

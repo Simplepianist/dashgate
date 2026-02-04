@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"dashgate/internal/auth"
+	"dashgate/internal/middleware"
 	"dashgate/internal/server"
 )
 
@@ -18,7 +19,7 @@ func DependenciesHandler(app *server.App) http.HandlerFunc {
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(map[string]string{
 				"error":    "unauthorized",
-				"redirect": "/login",
+				"redirect": middleware.GetAuthRedirectURL(app),
 			})
 			return
 		}
